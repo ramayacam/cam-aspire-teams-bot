@@ -66,6 +66,21 @@ ASPIRE_PHRASES = [
 BM25_K1 = 1.5   # term-frequency saturation point
 BM25_B = 0.75   # length-normalization strength
 
+# Header keywords that signal a section DEFINES or gives an OVERVIEW of terms.
+# Used to boost such sections for conceptual ("what is", "difference") queries.
+DEFINITIONAL_HEADERS = (
+    "concept", "type", "what is", "what are", "overview", "key ",
+    "terminology", "introduction", "difference", "vs",
+)
+
+# Phrases in a query that signal the user wants a definition or comparison
+# rather than a procedure.
+CONCEPTUAL_QUERY_MARKERS = (
+    "difference", "differ", "what is", "what are", "vs", "versus",
+    "compare", "comparison", "explain", "meaning", "definition",
+    "define", "type of", "types of", "when to use", "when do i use",
+)
+
 # Chunking
 MAX_CHUNK_CHARS = 1800   # H2 sections longer than this get split on H3
 MIN_CHUNK_CHARS = 40     # ignore tiny fragments
@@ -227,6 +242,10 @@ class KnowledgeBase:
             return []
 
         words, phrases = self._query_terms(query)
+        q_lower = query.lower()
+
+        # Is this a "define / compare" question vs a "how do I" procedure?
+        is_conceptual = any(m in q_lower for m in CONCEPTUAL_QUERY_MARKERS)
 
         # Stem the phrases too, so "work order" matches "work orders" in text.
         # We match phrases against a stemmed version of each chunk's tokens
@@ -268,6 +287,17 @@ class KnowledgeBase:
                 score += 8.0 * (coverage_ratio ** 2)
                 if covered == len(concepts) and len(concepts) >= 2:
                     score += 5.0
+
+            # Definitional boost: questions like "what is X" or
+            # "difference between X and Y" are best answered by sections that
+            # DEFINE things. Reward chunks whose header signals a definition
+            # or overview, when the query is conceptual.
+            if is_conceptual:
+                if any(kw in header_lower for kw in DEFINITIONAL_HEADERS):
+                    score += 7.0
+                # The compact concept/overview chunks are ideal here
+                if "concept" in header_lower or "type" in header_lower:
+                    score += 3.0
 
             # Header / source relevance boosts
             for w in words:
