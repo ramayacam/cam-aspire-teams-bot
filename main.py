@@ -1,9 +1,12 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from app.bot import handle_message
+from app.knowledge import KnowledgeBase
 from config.settings import settings
 
 app = FastAPI(title="Aspire Knowledge Bot")
+
+kb = KnowledgeBase()
 
 
 @app.get("/health")
@@ -16,9 +19,32 @@ async def root():
     return {"message": "Aspire Knowledge Bot API"}
 
 
+@app.get("/debug")
+async def debug():
+    """Shows how many docs and chunks are loaded"""
+    return {
+        "total_chunks": len(kb.chunks),
+        "sources": list(set(c["source"] for c in kb.chunks)) if kb.chunks else [],
+        "sample": kb.chunks[0]["content"][:200] if kb.chunks else "No chunks loaded"
+    }
+
+
+@app.get("/debug/search")
+async def debug_search(q: str = "complete work ticket"):
+    """Test search results"""
+    results = kb.search(q, top_k=3)
+    return {
+        "query": q,
+        "results_found": len(results),
+        "results": [
+            {"source": r["source"], "preview": r["content"][:300]}
+            for r in results
+        ]
+    }
+
+
 @app.post("/ask")
 async def ask(request: Request):
-    """Test endpoint - send a question and get a response"""
     try:
         body = await request.json()
         question = body.get("question", "")
@@ -43,7 +69,6 @@ async def ask(request: Request):
 
 @app.post("/api/messages")
 async def messages(request: Request):
-    """Teams webhook - will be completed in Teams integration step"""
     try:
         body = await request.json()
         text = body.get("text", "")
