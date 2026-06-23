@@ -76,6 +76,10 @@ async def ask(request: Request):
         print(f"Error: {str(e)}")
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+@app.get("/api/messages")
+async def messages_get():
+    """Azure Bot Framework verification endpoint."""
+    return Response(status_code=200)
 
 @app.post("/api/messages")
 async def messages(request: Request):
