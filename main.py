@@ -83,17 +83,18 @@ async def messages_get():
 
 @app.post("/api/messages")
 async def messages(request: Request):
-    """Main Teams webhook — validates Azure JWT and processes messages."""
+    """Main Teams webhook."""
     try:
         body = await request.json()
+        print(f"Received message: {body}")
+
         activity = Activity().deserialize(body)
 
-        auth_header = request.headers.get("Authorization", "")
-
+        # Skip JWT validation temporarily for debugging
         async def call_bot(turn_context: TurnContext):
             await on_message(turn_context)
 
-        await adapter.process_activity(activity, auth_header, call_bot)
+        await adapter.process_activity(activity, "", call_bot)
         return Response(status_code=201)
 
     except Exception as e:
