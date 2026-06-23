@@ -12,13 +12,21 @@ app = FastAPI(title="Aspire Knowledge Bot")
 kb = KnowledgeBase()
 
 # Bot Framework adapter — configured for a Single Tenant Azure Bot.
-# Single Tenant bots MUST declare the app type and tenant id, otherwise
-# token validation fails silently and Teams messages never reach the bot.
+# Single Tenant bots authenticate against their specific tenant, not the
+# global endpoint. We pass channel_auth_tenant + custom app_credentials so
+# tokens are validated against login.microsoftonline.com/<tenant>.
+from botframework.connector.auth import MicrosoftAppCredentials
+
+app_credentials = MicrosoftAppCredentials(
+    settings.AZURE_APP_ID,
+    settings.AZURE_APP_PASSWORD,
+    channel_auth_tenant=settings.AZURE_TENANT_ID,
+)
 adapter_settings = BotFrameworkAdapterSettings(
     app_id=settings.AZURE_APP_ID,
     app_password=settings.AZURE_APP_PASSWORD,
     channel_auth_tenant=settings.AZURE_TENANT_ID,
-    app_type="SingleTenant",
+    app_credentials=app_credentials,
 )
 adapter = BotFrameworkAdapter(adapter_settings)
 
