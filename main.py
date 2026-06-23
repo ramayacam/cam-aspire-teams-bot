@@ -32,14 +32,18 @@ adapter = BotFrameworkAdapter(adapter_settings)
 
 
 async def on_message(turn_context: TurnContext):
-    """Called by the adapter for every validated Teams message."""
+    """Called by the adapter for every incoming activity."""
+    # Only respond to actual text messages. Teams also sends system events
+    # (members added, conversation updates, typing, etc.) — ignore those
+    # so the bot doesn't reply with the default prompt repeatedly.
+    if turn_context.activity.type != "message":
+        return
+
     text = turn_context.activity.text or ""
-    # Remove @mention tags
     text = re.sub(r"<at>.*?</at>\s*", "", text).strip()
 
     if not text:
-        await turn_context.send_activity("Please ask a question about Aspire Cloud.")
-        return
+        return  # empty message, nothing to answer
 
     user_id = turn_context.activity.from_property.id or "unknown"
     answer = await handle_message(text, user_id)
