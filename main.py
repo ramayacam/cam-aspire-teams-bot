@@ -11,10 +11,14 @@ app = FastAPI(title="Aspire Knowledge Bot")
 
 kb = KnowledgeBase()
 
-# Bot Framework adapter — validates Azure JWT tokens on every message
+# Bot Framework adapter — configured for a Single Tenant Azure Bot.
+# Single Tenant bots MUST declare the app type and tenant id, otherwise
+# token validation fails silently and Teams messages never reach the bot.
 adapter_settings = BotFrameworkAdapterSettings(
     app_id=settings.AZURE_APP_ID,
     app_password=settings.AZURE_APP_PASSWORD,
+    channel_auth_tenant=settings.AZURE_TENANT_ID,
+    app_type="SingleTenant",
 )
 adapter = BotFrameworkAdapter(adapter_settings)
 
@@ -76,25 +80,27 @@ async def ask(request: Request):
         print(f"Error: {str(e)}")
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+
 @app.get("/api/messages")
 async def messages_get():
-    """Azure Bot Framework verification endpoint."""
+    """Azure Bot Framework verification endpoint (GET healthcheck)."""
     return Response(status_code=200)
+
 
 @app.post("/api/messages")
 async def messages(request: Request):
-    """Main Teams webhook."""
+    """Main Teams webhook — validates Azure JWT and processes messages."""
     try:
         body = await request.json()
-        print(f"Received message: {body}")
+        print(f"Received activity type: {body.get('type')}")
 
         activity = Activity().deserialize(body)
+        auth_header = request.headers.get("Authorization", "")
 
-        # Skip JWT validation temporarily for debugging
         async def call_bot(turn_context: TurnContext):
             await on_message(turn_context)
 
-        await adapter.process_activity(activity, "", call_bot)
+        await adapter.process_activity(activity, auth_header, call_bot)
         return Response(status_code=201)
 
     except Exception as e:
