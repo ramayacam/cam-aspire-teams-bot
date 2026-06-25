@@ -65,16 +65,39 @@ async def debug():
     return kb.stats()
 
 
-@app.get("/debug/search")
-async def debug_search(q: str = "complete work ticket"):
-    results = kb.search(q, top_k=6)
+@app.get("/debug/tokens")
+async def debug_tokens(q: str = "How do I complete a work ticket?"):
+    """Diagnostic: shows how many chunks are retrieved for a query and an
+    estimate of the tokens sent to Claude. Useful for tuning and cost analysis.
+    Token estimate uses the chars/4 heuristic (close to real Claude tokens
+    for English markdown)."""
+    chunks = kb.search(q, top_k=6)
+
+    context_text = "\n\n---\n\n".join(
+        f"[Source: {c['source']} — {c.get('header', '')}]\n{c['content']}"
+        for c in chunks
+    )
+
+    def est_tokens(text: str) -> int:
+        return len(text) // 4
+
+    per_chunk = [
+        {
+            "rank": i + 1,
+            "source": c["source"],
+            "header": c["header"],
+            "chars": len(c["content"]),
+            "est_tokens": est_tokens(c["content"]),
+        }
+        for i, c in enumerate(chunks)
+    ]
+
     return {
         "query": q,
-        "results_found": len(results),
-        "results": [
-            {"source": r["source"], "header": r["header"], "preview": r["content"][:200]}
-            for r in results
-        ],
+        "chunks_retrieved": len(chunks),
+        "total_context_chars": len(context_text),
+        "total_context_est_tokens": est_tokens(context_text),
+        "per_chunk": per_chunk,
     }
 
 
