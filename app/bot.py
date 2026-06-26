@@ -1,6 +1,5 @@
 """
 Bot orchestration: ties retrieval (knowledge) to generation (claude).
-Logs token usage for each query to stdout (visible in Render logs).
 
 Kept intentionally thin. Heavy lifting lives in knowledge.py and claude.py.
 Conversation history is in-memory (per-process). It is NOT persistent: a
@@ -11,12 +10,14 @@ swap in Supabase here later if persistence is needed.
 from app.knowledge import KnowledgeBase
 from app.claude import ClaudeClient
 
+# Built once at import time. Loading + indexing the KB is fast (<1s).
 knowledge = KnowledgeBase()
 claude = ClaudeClient()
 
+# user_id -> list of {role, content}. Bounded to avoid unbounded growth.
 _conversations = {}
-MAX_HISTORY_MESSAGES = 10
-MAX_TRACKED_USERS = 500
+MAX_HISTORY_MESSAGES = 10          # 5 exchanges
+MAX_TRACKED_USERS = 500            # simple safety cap on memory
 
 
 def _get_history(user_id: str) -> list:
@@ -29,29 +30,21 @@ def _save_turn(user_id: str, question: str, answer: str):
     history.append({"role": "assistant", "content": answer})
     _conversations[user_id] = history[-MAX_HISTORY_MESSAGES:]
 
+    # Crude eviction if too many users tracked (keeps memory bounded)
     if len(_conversations) > MAX_TRACKED_USERS:
+        # Drop an arbitrary oldest-inserted key
         oldest = next(iter(_conversations))
         _conversations.pop(oldest, None)
 
 
-def _log_usage(user_id: str, question: str, usage: dict):
-    """Print token usage to stdout — shows up in Render logs."""
-    short_q = question[:80].replace("\n", " ")
-    print(
-        f"[USAGE] user={user_id} | "
-        f"input={usage.get('input_tokens', 0)} | "
-        f"output={usage.get('output_tokens', 0)} | "
-        f"cache_read={usage.get('cache_read_tokens', 0)} | "
-        f"cache_creation={usage.get('cache_creation_tokens', 0)} | "
-        f"q='{short_q}'"
-    )
-
-
 async def handle_message(text: str, user_id: str = "default") -> str:
+    """Process one user message and return the bot's reply text.
+    Never raises — always returns a string suitable to show the user."""
     text = (text or "").strip()
     if not text:
         return "Please ask a question about Aspire Cloud."
 
+    # Trivial greetings shouldn't trigger a doc search
     if text.lower() in {"hi", "hello", "hey", "hola", "buenas"}:
         return (
             "Hi! I'm the Aspire Cloud assistant for CAM. Ask me about work "
@@ -61,11 +54,9 @@ async def handle_message(text: str, user_id: str = "default") -> str:
     try:
         context = knowledge.search(text, top_k=6)
         history = _get_history(user_id)
-        answer, usage = claude.ask(text, context, history)
-
-        _log_usage(user_id, text, usage)
+        answer = claude.ask(text, context, history)
         _save_turn(user_id, text, answer)
         return answer
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — must never crash the webhook
         print(f"handle_message error: {type(e).__name__}: {e}")
         return "Something went wrong. Please try again."
