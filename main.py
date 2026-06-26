@@ -138,4 +138,35 @@ async def ask(request: Request):
         question = body.get("question", "")
         if not question:
             return JSONResponse({"error": "No question provided"})
-        answer = await
+        answer = await handle_message(question)
+        return JSONResponse({"question": question, "answer": answer})
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+@app.get("/api/messages")
+async def messages_get():
+    return Response(status_code=200)
+
+
+@app.post("/api/messages")
+async def messages(request: Request):
+    try:
+        body = await request.json()
+        activity = Activity().deserialize(body)
+        auth_header = request.headers.get("Authorization", "")
+
+        async def call_bot(turn_context: TurnContext):
+            await on_turn(turn_context)
+
+        await adapter.process_activity(activity, auth_header, call_bot)
+        return Response(status_code=201)
+    except Exception as e:
+        print(f"Teams webhook error: {type(e).__name__}: {e}")
+        return Response(status_code=500)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=settings.BOT_PORT)
