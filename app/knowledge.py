@@ -82,6 +82,10 @@ CONCEPTUAL_QUERY_MARKERS = (
 )
 
 # Chunking
+# Adaptive retrieval: keep chunks scoring at least this fraction of the
+# top chunk's score. Lower = more chunks kept. 0.35 trims weak matches.
+RELATIVE_CUTOFF = 0.35
+
 MAX_CHUNK_CHARS = 1800   # H2 sections longer than this get split on H3
 MIN_CHUNK_CHARS = 40     # ignore tiny fragments
 
@@ -311,6 +315,91 @@ class KnowledgeBase:
 
         scored.sort(key=lambda x: x[0], reverse=True)
         return [c for _, c in scored[:top_k]]
+
+
+    def search_scored(self, query: str, top_k: int = 6):
+        """Like search() but also returns diagnostic scores used for
+        relevance gating and adaptive chunk count.
+
+        Returns a dict:
+          chunks: list of chunk dicts (after adaptive trimming)
+          max_pure_bm25: highest pure BM25 score (0 = no content match at all)
+          max_total: highest combined score (with boosts)
+        Pure BM25 == 0 is a reliable 'off-topic / not in KB' signal because
+        off-topic questions share no content words with any chunk.
+        """
+        if not self.chunks:
+            return {"chunks": [], "max_pure_bm25": 0.0, "max_total": 0.0}
+
+        words, phrases = self._query_terms(query)
+        q_lower = query.lower()
+        is_conceptual = any(m in q_lower for m in CONCEPTUAL_QUERY_MARKERS)
+
+        stemmed_phrases = [" ".join(_tokenize(p)) for p in phrases]
+        concepts = list(stemmed_phrases)
+        phrase_words = {w for p in stemmed_phrases for w in p.split()}
+        concepts += [w for w in words if w not in phrase_words]
+        concepts = list(dict.fromkeys(concepts))
+
+        max_pure = 0.0
+        scored = []
+        for idx, chunk in enumerate(self.chunks):
+            pure = self._bm25_score(idx, words)
+            if pure > max_pure:
+                max_pure = pure
+            score = pure
+
+            stemmed_text = " ".join(self._doc_tokens[idx])
+            header_lower = chunk["header"].lower()
+            stemmed_header = " ".join(_tokenize(chunk["header"]))
+            source_lower = chunk["source"].lower().replace("_", " ")
+
+            for phrase in stemmed_phrases:
+                if phrase in stemmed_text:
+                    score += 6.0
+                if phrase in stemmed_header:
+                    score += 4.0
+
+            if concepts:
+                covered = sum(1 for c in concepts if c in stemmed_text)
+                cov = covered / len(concepts)
+                score += 8.0 * (cov ** 2)
+                if covered == len(concepts) and len(concepts) >= 2:
+                    score += 5.0
+
+            if is_conceptual:
+                if any(kw in header_lower for kw in DEFINITIONAL_HEADERS):
+                    score += 7.0
+                if "concept" in header_lower or "type" in header_lower:
+                    score += 3.0
+
+            for w in words:
+                if w in stemmed_header:
+                    score += 1.5
+                if w in source_lower:
+                    score += 1.0
+
+            if score > 0:
+                scored.append((score, chunk))
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+        top = scored[:top_k]
+        max_total = top[0][0] if top else 0.0
+
+        # Adaptive trimming: keep chunks whose score is at least
+        # RELATIVE_CUTOFF of the best chunk. Simple questions naturally
+        # end up with fewer chunks; complex ones keep more.
+        if top:
+            best = top[0][0]
+            kept = [c for s, c in top if s >= best * RELATIVE_CUTOFF]
+        else:
+            kept = []
+
+        return {
+            "chunks": kept,
+            "max_pure_bm25": round(max_pure, 2),
+            "max_total": round(max_total, 2),
+        }
 
     # ----- diagnostics --------------------------------------------------------
 
