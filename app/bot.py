@@ -1,23 +1,27 @@
 """
 Bot orchestration: ties retrieval (knowledge) to generation (claude).
 
-Kept intentionally thin. Heavy lifting lives in knowledge.py and claude.py.
-Conversation history is in-memory (per-process). It is NOT persistent: a
-Render restart clears it. For 10 sessions/day that's an acceptable tradeoff;
-swap in Supabase here later if persistence is needed.
+Relevance gate: off-topic questions (pure BM25 ~0) get a scope reply WITHOUT
+calling Claude. Token usage is logged to stdout (visible in Render logs).
 """
 
 from app.knowledge import KnowledgeBase
 from app.claude import ClaudeClient
 
-# Built once at import time. Loading + indexing the KB is fast (<1s).
 knowledge = KnowledgeBase()
 claude = ClaudeClient()
 
-# user_id -> list of {role, content}. Bounded to avoid unbounded growth.
 _conversations = {}
-MAX_HISTORY_MESSAGES = 10          # 5 exchanges
-MAX_TRACKED_USERS = 500            # simple safety cap on memory
+MAX_HISTORY_MESSAGES = 10
+MAX_TRACKED_USERS = 500
+
+RELEVANCE_FLOOR = 1.0
+
+OFF_TOPIC_REPLY = (
+    "I'm the Aspire Cloud assistant for CAM — I can only help with questions "
+    "about Aspire Cloud (work tickets, scheduling, invoicing, opportunities, "
+    "and related topics). Try asking me something about those areas."
+)
 
 
 def _get_history(user_id: str) -> list:
@@ -29,12 +33,25 @@ def _save_turn(user_id: str, question: str, answer: str):
     history.append({"role": "user", "content": question})
     history.append({"role": "assistant", "content": answer})
     _conversations[user_id] = history[-MAX_HISTORY_MESSAGES:]
-
-    # Crude eviction if too many users tracked (keeps memory bounded)
     if len(_conversations) > MAX_TRACKED_USERS:
-        # Drop an arbitrary oldest-inserted key
         oldest = next(iter(_conversations))
         _conversations.pop(oldest, None)
+
+
+def _log_usage(user_id, question, usage, chunks, gated=False):
+    short_q = question[:80].replace("\n", " ")
+    if gated:
+        print(f"[USAGE] user={user_id} | GATED (off-topic, no Claude call) | q='{short_q}'")
+        return
+    print(
+        f"[USAGE] user={user_id} | "
+        f"chunks={chunks} | "
+        f"input={usage.get('input_tokens', 0)} | "
+        f"output={usage.get('output_tokens', 0)} | "
+        f"cache_read={usage.get('cache_read_tokens', 0)} | "
+        f"cache_creation={usage.get('cache_creation_tokens', 0)} | "
+        f"q='{short_q}'"
+    )
 
 
 async def handle_message(text: str, user_id: str = "default") -> str:
@@ -44,19 +61,28 @@ async def handle_message(text: str, user_id: str = "default") -> str:
     if not text:
         return "Please ask a question about Aspire Cloud."
 
-    # Trivial greetings shouldn't trigger a doc search
     if text.lower() in {"hi", "hello", "hey", "hola", "buenas"}:
         return (
-            "Hi! I'm the Aspire Cloud assistant for CAM. Ask me about work "
-            "tickets, scheduling, invoicing, opportunities, and more."
+            "Hi! I'm Aspi 🤖, the Aspire Cloud assistant for CAM. Ask me about "
+            "work tickets, scheduling, invoicing, opportunities, and more."
         )
 
     try:
-        context = knowledge.search(text, top_k=6)
+        result = knowledge.search_scored(text, top_k=6)
+        chunks = result["chunks"]
+
+        # Relevance gate: off-topic questions never reach Claude.
+        if result["max_pure_bm25"] <= RELEVANCE_FLOOR or not chunks:
+            _log_usage(user_id, text, {}, 0, gated=True)
+            _save_turn(user_id, text, OFF_TOPIC_REPLY)
+            return OFF_TOPIC_REPLY
+
         history = _get_history(user_id)
-        answer = claude.ask(text, context, history)
+        answer, usage = claude.ask(text, chunks, history)   # ✅ desempaca la tupla
+
+        _log_usage(user_id, text, usage, len(chunks))
         _save_turn(user_id, text, answer)
         return answer
-    except Exception as e:  # noqa: BLE001 — must never crash the webhook
+    except Exception as e:  # noqa: BLE001
         print(f"handle_message error: {type(e).__name__}: {e}")
         return "Something went wrong. Please try again."
