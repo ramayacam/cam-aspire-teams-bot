@@ -1,446 +1,386 @@
-# Scheduling Module — Aspire Knowledge Base
+# Scheduling Module (Aspire)
 
 System URL: https://cloud.youraspire.com/
 
-## 1. Module Overview
+*The operations hub where Division Managers and route managers schedule won services to Ops Managers and crews, then track time through to payroll. Covers the Schedule Board, routes (creating, managing, changing, deleting), route optimization, schedule changes and deletions, checklists, SMS notifications, and the full time-entry lifecycle (daily acceptance, weekly review, manual entry, Aspire Mobile, quick tickets). Structure based on the Aspire Academy Scheduling and Mobile & Time Entry chapters, enriched with operational depth from the reference documentation.*
 
-The Scheduling module is where work tickets generated from opportunities/services are placed on calendars, assigned to crews, executed in the field, and have their labor/material time recorded.
+> **Who this is for:** Division Managers and route managers who calendar services out to Ops Managers / crews, and the office staff who review the resulting time. The priority topics are how to **schedule work, and how to change or remove it** once scheduled.
 
-Core screens:
-| Screen | Purpose |
+---
+
+## What is the Schedule Board?
+
+The **schedule board** is the operations hub — a flexible digital whiteboard where work gets assigned to crews across days. Work tickets appear here to be scheduled once their opportunity is **won**.
+
+- **Organized by manager:** a drop-down (top-left) selects the route manager; each manager has their own board with their routes/crews. Routes run down one side, days across the top.
+- **Views:** weekly (default, Mon–Sun) or monthly (upper-right). The **Working Days** drop-down adjusts which days are visible.
+- **Work-ticket list:** the **clipboard icon** (top-right) shows tickets waiting to be scheduled; expand it with the left caret to reveal more columns.
+- **A scheduled tile** shows the occurrence number, property abbreviation, service abbreviation, and estimated hours; the day total shows scheduled estimated hours.
+- **Route colors:** each route can display a distinct color for quick visual scanning.
+
+**Search prefixes on the board:** `s` = service, `t` = ticket, `o` = opportunity number, `P` = property name. (e.g., `O` + a number shows all tickets for that opportunity.)
+
+**Navigate:** Scheduling icon (blue side panel) → schedule board → choose the route manager.
+
+---
+
+## The Scheduling Workflow — From Won Ticket to Assigned Crew
+
+This is the core flow a Division Manager follows to calendar services out to Ops Managers and crews:
+
+1. **A service is won** → Aspire generates work tickets (Open status), which appear in the work-ticket list (clipboard icon).
+2. **Set up routes** (once) → each route is a crew or individual that performs scheduled tickets, under a route manager (the Ops Manager). See "Routes" below.
+3. **Schedule the ticket** → drag it from the work-ticket list onto the correct route and day, or use the **Scheduling Assistant** for sequenced/recurring visits.
+4. **Order the visits** → use Route Scheduling (manual) or Route Optimization (automatic) so the crew's day is efficient.
+5. **Crew performs the work** → they see it in Aspire Mobile, clock in/out, and record time/materials.
+6. **Review the time** → Daily Time Acceptance (catch errors) → Weekly Time Review (approve + export to payroll).
+7. **Make changes as needed** → reschedule, skip, insert blank days, or remove — see "Making Changes to the Schedule."
+
+> The relationship to work-ticket status: a ticket is **Open** until scheduled, then **Scheduled** on the board, then **Complete** after the crew finishes and time is accepted. (Full status rules live in the Work Tickets module — here, "Scheduled" simply means the ticket is placed on the board, and a ticket stuck in Scheduled past its date signals a problem to investigate.)
+
+---
+
+## Routes — Creating & Managing
+
+A **route** is an individual or crew set up to perform scheduled work tickets. A manager can have **multiple routes**, but **only one Crew Leader per route.**
+
+### Sequenced vs. Time-Based routes
+
+| Type | Behavior |
+|------|----------|
+| **Sequenced** | No start/end time; visits are scheduled in sequence based on the route's man-hours. You can set available working days. |
+| **Time-Based** | Requires working hours; visits have specific start/end times; supports overnight visits. ⚠️ **Route Optimization is disabled** for time-based routes, and **absentee notifications require time-based scheduling.** |
+
+**Time-based visual cues:** clock icon + time zone; gray banner = working hours with no visits; blue banner = scheduled visits; red background = conflict or outside working hours; link icon = multi-day visit. ⚠️ Time ranges per day **cannot overlap** — an overnight shift needs two ranges split at midnight.
+
+### Creating a route
+Scheduling module → three-dot → **Manage Routes** → **New Route** →
+1. Name (consistent convention — crew leader or property name).
+2. Confirm **branch**; set **route manager** and **crew leader**; optional division.
+3. **Man-hours/day** (largest possible for one member); **route size** (number of people incl. crew leader).
+4. **Display order** (increments of 10); **color**.
+5. Add **crew members** (needed so absentee notifications can cover all members).
+6. Optional **property / service / service-type restrictions**.
+7. Scheduling type: **Add to Schedule** → pick working days (sequenced) or days + times (time-based) → **Save**.
+
+**Permissions:** Edit Routes + Full Access to Schedule Board (manage/edit routes and crew/properties); View Routes (activate/deactivate a route); the **Time-Based Scheduling** checkbox on the branch record enables the sequenced-vs-time-based choice.
+
+### Recurring Schedule for Time-Based Routes (303C / 304C)
+For time-based routes, you can set a **recurring schedule** so visits repeat automatically (e.g., every Monday and Thursday at set times) instead of scheduling each visit by hand. Set it after the route is created; recurring visits then populate the board on the defined cadence. (Recurring scheduling is what enables **Skip This Week's Visit** — see below.)
+
+### Managing / editing a route
+Scheduling → three-dot → **Manage Routes** → select the route → edit crew members, properties, working days/times, color, or man-hours → Save. Use **View Routes** permission to **activate/deactivate** a route without deleting it.
+
+---
+
+## Route Scheduling & Optimization
+
+Two features control the **order** crews visit properties on a given day.
+
+| Feature | What it does |
 |---|---|
-| Schedule Board | Drag-and-drop calendar to schedule visits by route or property |
-| Route Scheduling | Map-based optimization of stops |
-| Scheduling Assistant | Auto-generate visits from sequence/recurring rules |
-| Time Entry (Daily Acceptance) | Approve crew clock-ins/outs daily |
-| Weekly Time Review | Final approval of hours into payroll |
-| Aspire Mobile | Crew app for clock-in, time, materials, forms |
+| **Route Scheduling** | **Manually** sequence visits — you specify the visit order of each property on a route for a day. |
+| **Route Optimization** | **Automatically** sequences visits in the most efficient order based on distance and drive time — reduces fuel, wear, and can free time for more tickets. |
+
+The route-scheduling **map** shows property icons color-coded by route; the number on each icon is the visit order. Each icon shows the work ticket number, opportunity number, scheduled service, and visit hours. A **green check mark** at the bottom of a route means it's optimized — **manually reordering removes the check mark.**
+
+### Use Route Scheduling (manual order)
+1. Schedule board → **three-dot menu** (top-right) → **Route Scheduling**.
+2. Confirm route manager and date.
+3. Click **Set Route Order** → select the route → Save.
+4. Click property icons in the order visits should occur (the number on the arrows becomes the sequence); use the **reset icon** to start over.
+5. **Save** and confirm; the map refreshes.
+
+### Use Route Optimization (automatic order)
+- **One route, one day:** click the blank space on that day/route → **Optimize Route**.
+- **One route, entire week:** right-click the route name → **Optimize Route**.
+- **All routes under a manager, one day:** right-click the day header → **Optimize Routes**.
+- **All routes/days for a manager, a week:** three-dot menu → **Optimize Route** button.
+
+⚠️ If you don't see the Optimize option, Route Optimization must be enabled for your Aspire system (and remember it's disabled on time-based routes).
 
 ---
 
-## 2. Required Permissions
+## Making Changes to the Schedule (reschedule, skip, remove)
 
-| Permission | Allows |
+This is a core Division-Manager task. Here's how to change or remove scheduled work without disrupting the whole board.
+
+### Reschedule a visit (change day/crew)
+**Drag and drop** the visit tile to a different day or route on the schedule board. This updates the scheduled date and, if moved to another route, reassigns the crew. (If SMS visit reminders are configured and the reminder already sent, a change triggers a Reschedule Notification — see SMS below.)
+
+### Remove a visit from the schedule (back to Open)
+To take a ticket off the board without cancelling the work: drag it back to the work-ticket list, or right-click the tile and remove it. The ticket returns to **Open** status and can be rescheduled later. (To **cancel** the work entirely — not just unschedule it — use the Work Tickets module; cancellation rules depend on invoice type.)
+
+### Skip This Week's Visit
+For **weekly or bi-weekly** recurring visits only, and only after the recurring schedule is set:
+1. Right-click the visit tile on the schedule board.
+2. Select **Skip This Week's Visit**.
+
+⚠️ **Skipping pushes ALL occurrences forward one week.** Any work ticket pushed **past the contract end date** is set to **Open** status — make sure it's completed before the contract ends. Use for last-minute customer requests or bad weather.
+
+### Insert Blank Days (push a route forward)
+To handle a crew illness, equipment failure, or supply delay without wrecking the schedule:
+1. Right-click a day on the route → **Insert Blank Days**.
+2. Specify: how many days of visits to move, how many days forward, and whether shifted visits may land on the weekend.
+3. **Look ahead** for conflicts with recurring services and confirm the route isn't over-scheduled; drag-and-drop tiles to fix conflicts.
+
+⚠️ After skipping or inserting blank days, always look ahead so you don't over-schedule a crew or leave a contract's tickets unscheduled.
+
+### Delete / deactivate a route
+To stop using a route: Scheduling → three-dot → Manage Routes → select route → **deactivate** (keeps history) or delete if empty. Reassign or reschedule its visits first so no tickets are stranded.
+
+---
+
+## Scheduling Assistant
+
+An alternative to drag-and-drop, useful for sequenced or recurring/time-based visits. Open it from the **Scheduling Assistant** icon on the board: select the ticket(s), choose the route and the recurring pattern or specific days, and Aspire places the visits according to the service schedule and route man-hours. Best for placing a full contract's recurring visits at once rather than dragging each occurrence.
+
+---
+
+## As-Needed Services & Work Tickets
+
+Services marked **as-needed** (Per Service invoice type) don't auto-schedule — they wait in the work-ticket list under "as needed" until requested. Drag one onto the board only when the service is actually requested; it invoices only after completion. Use **Bulk Actions → Swap As Needed Service** (e.g., for snow) to change the service on an as-needed ticket. (See Work Tickets module for full ticket-action detail.)
+
+---
+
+## Service Visit Checklists
+
+**Service Visit Checklists** break a service into actionable tasks crews must complete before a work ticket can be completed — for accountability and quality tracking.
+
+- **Enable at BOTH system and branch levels** (branch-level is required even with a single branch).
+- **Mandatory items:** an item marked mandatory in the Service Catalog is mandatory on **all** opportunities using that service; to make it optional per job, mark mandatory on individual opportunities instead.
+- A checklist-related checkbox/indicator also appears on the **work ticket screen** itself, distinct from where checklists are configured.
+
+**Permissions:** View Visit Checklists (view the report); Make Visit Checklist Items Mandatory in the Service Catalog.
+
+**Enable:** Administration → Configuration → **Application** → check **Enable Visit Checklist** → Save; then Administration → **Organization** → **Branches** → branch → check **Enable Visit Checklist** → Save.
+**Create items:** Administration → **Estimating** → **Visit Checklist Items** → New → name by task → choose branches + divisions → Save.
+**Attach to a service:** Administration → Estimating → **Service Catalog** → service → **Visit Checklist** section → add items → mark **Mandatory** as needed → Save.
+
+---
+
+## SMS Notifications
+
+Two types: **Visit Reminders** (to customers) and **Absentee Notifications** (internal). Configuration, permissions, and opt-in/opt-out live in the Administration chapter; this covers how they behave in use.
+
+### Visit Reminders
+- Sent the **day before** the visit at the template time. Cannot be duplicated — copy the template and change Delivery Time Details for multiple reminders.
+- **Not triggered** if the visit is scheduled after the reminder time (e.g., reminder set 1 PM Tuesday; visit scheduled after 1 PM Monday → no reminder).
+- **Cancellation Notification** (visit deleted): sent within 15 min; fixed format; not sent if the visit was canceled/rescheduled before the reminder triggered.
+- **Reschedule Notification** (date/time changed): sent within 15 min, only if the original reminder already sent. A sequence-only change (same date/time) doesn't trigger it; a future reschedule sends both a Reschedule Notification and a new Visit Reminder.
+
+### Absentee Notifications
+- Internal alert when a team member hasn't clocked in after the scheduled start. ⚠️ **Only compatible with Time-Based Routes.**
+- **Recipients / Additional Recipients:** who gets the alert. **Grace Period:** acceptable minutes past the Visit Start Time before sending (5–240 min).
+- **Trigger Type** defaults to Job Not Started in Mobile; **Delivery Time** defaults to Immediately.
+- **Property Tags** filter which properties trigger it; cleaners must be on the same time-based route. Overnight visits trigger a single notification (no next-day repeat). One message per template; separate messages per differing Grace Period.
+
+---
+
+## Consumables (scheduling side)
+
+Consumables deliveries are scheduled on a dedicated **Consumables Route**. Field crews request supplies via **Open Issues → Consumables Request** in mobile (requires a Consumables Request issue category in Administration). Completed consumable tickets go to **Pending Approval** before Invoicing. Full setup (Service/Item Catalog, T&M pricing hierarchy, contract vs. work-order handling) is in the **Opportunities module → Consumables**.
+
+---
+
+## Time Entry — The Three Parts
+
+Time entry connects three steps: the **Aspire Mobile app** (real-time capture), **Daily Time Acceptance** (catch errors early), and **Weekly Time Review** (final payroll check).
+
+### Three types of time
+- **Clock Time** — the employee's total paid time for the day (clock-in to clock-out, minus configured break).
+- **Direct Time** — time serving customers on property, applied to work tickets.
+- **Indirect Time** — time on indirect tickets (equipment maintenance, shop time, training) not chargeable to a direct ticket.
+- **Difference / Drive Time** — time between tickets; on save, Aspire distributes it **proportionally** across the day's tickets (more hours on a ticket = more drive time). Exaggerated drive time signals time wasn't applied to a ticket.
+
+---
+
+## Daily Time Acceptance
+
+The production/route manager reviews each crew's time **daily** to catch errors (unallocated materials, wrong clock-outs) before payroll.
+
+**Icons:** mobile-device icon = time captured but not accepted; **green clock** = reviewed and accepted.
+
+**Procedure:** Schedule board → click the blank space on the route/day → **Time Entry**. Review in order:
+1. **Clock Time** — add crew members via Add New if needed; check clock-in/out and the auto-deducted lunch.
+2. **Direct Job Time** — every ticket has time; verify lunch reported against the right ticket; confirm completed check marks.
+3. **Indirect Time** — shop/meeting/training.
+4. Review the **Difference** (drive time).
+5. **Save** — the icon turns to a green clock.
+
+---
+
+## Weekly Time Review
+
+The final check of all hours (including OT); each employee's time must be **approved** before export to payroll.
+
+- Aspire shows 7 days starting from the payroll first-day set in Configuration. ⚠️ **Don't filter by branch** (you may miss cross-branch hours); filter by pay schedule to review hourly vs. salaried separately.
+- **Time-entry statuses (cannot skip):** **Unaccepted** (entered, not accepted in Daily — go back and save) → **Pending** (accepted, ready for approval — the desired state) → **Approved** → **Exported** (sent to payroll).
+- **Audits** (hover a time value): Open Time Entry, Time Entry Audit (log of changes), Clock Time Audit.
+- **Common errors:** missing pay rate, missing pay schedule (fix on the employee contact → Payroll), and **OT Pay Code Exception** (a day used a non-default pay code; you can still export, or manually update to the OT code).
+
+**Procedure:** Schedule board → **Weekly Time Review** tab → set the week → confirm all employees present → resolve errors → check total/OT columns (use audits for red flags) → check employees → **Bulk Actions → Approve** → **Bulk Actions → Export**. (Unapprove via Bulk Actions to correct, then reapprove.)
+
+---
+
+## Manual Time Entry
+
+For a forgotten lunch, no mobile app, correcting mobile mistakes, or adjusting direct/indirect ticket time.
+
+- The Time Entry screen uses **military time** — you can type `7A` / `4P` and Aspire converts. Lunch entered as a decimal (e.g., 0.50).
+- Multiple clock rows (Clock 1, Clock 2) capture crew members with different hours.
+- Saving moves completed tickets to Complete/Pending Approval and the day's time to **Pending** for weekly review; Difference distributes as drive time.
+
+**Procedure:** Schedule board → right-click the route/day → **Open Time Entry** → **+** next to Clock Time → **Add Crew Member** → enter clock times (start/end/lunch), click each employee's cell (turns green); add clock rows for differing hours → **Direct Job Time:** enter onsite start/stop per ticket, click crew cells, check Completed; add materials via three-dot → **Add Material** → item + quantity → **Indirect Job Time:** shop/meeting/training → review Difference → **Save**.
+
+---
+
+## Aspire Mobile
+
+The mobile app is the crew's real-time tool: view scheduled tickets, clock crew in/out, report lunch, start/stop job time, apply equipment/materials, view/respond to issues, add documents/photos, and request equipment service.
+
+- **Lead Cleaners / Crew Leaders:** manage the crew's clock, start/stop time per ticket, allocate materials, complete tickets, handle issues.
+- **Crew Members:** clock in/out and record their own time against assigned tickets.
+- **Visit Notes** are internal; **Opportunity/Invoice Notes** (on quick tickets) are customer-facing.
+
+---
+
+## Quick Tickets
+
+A **quick ticket** lets a crew leader log time/materials in mobile for jobs that pop up (e.g., irrigation repair) without building a full opportunity/estimate. A **quick ticket template** is a one-service work-order template that lets office staff create a work order on the fly from the Time Entry screen.
+
+- Routes need the **Show New Ticket** button enabled (Manage Routes) to create quick tickets in mobile.
+- On conversion, fields populate from the field entry; **Opportunity Invoice Notes** (entered by the crew leader) appear on the customer-facing invoice (no original proposal existed). **Visit Notes** stay internal.
+
+⚠️ **Bot-relevant guardrail:** on a quick-ticket work order (T&M invoice type by default), if the **price field in Time Entry is set to any amount greater than $0, the invoice type automatically changes from T&M to Fixed Price on Completion**, overriding the original service price. **Leave the price at $0 to preserve T&M billing.**
+
+**Enable:** Scheduling → three-dot → Manage Routes → route → check **Show New Ticket Button** → Save.
+**Convert (office):** Time Entry screen → quick ticket entry → three-dot → **Create New Ticket** → choose quick work-order template → review property/branch/division/name/price ($0)/invoice notes → Save.
+**Create in mobile (crew leader):** tickets icon → **+** → select property → **Create Quick Ticket** → add Opportunity/Invoice Notes → **Start Work** → add Visit Notes/images (internal) → **+** → **Material** → item + quantity → **Stop Work** → confirm **Complete**.
+
+---
+
+## Timekeeping Behavior (Branch-Level Settings)
+
+Modern timekeeping settings are **per-branch** for multi-branch flexibility:
+- Per-branch: **GEO radius**, drive time billable/non-billable, allow quick tickets, require checklists, pay code defaults.
+- **Time Correction Requests (mobile):** a crew member submits a correction (e.g., forgot clock-out) from mobile → routed to a supervisor approval queue → approved corrections post to Time Entry automatically.
+- **Auto Time Acceptance:** a branch setting can auto-accept error-free time entries after N hours; entries with errors still require manual review (reduces office workload for clean crews).
+
+---
+
+## Time Reporting Settings (Administration → Configuration → Time Reporting)
+
+Configuration for how clock and time behavior work. Navigate: Dashboard → Settings → Administration → Configuration → **Time Reporting** tab → save with the save icon.
+
+| Setting | What it does |
 |---|---|
-| Schedule Board – View/Edit | Open & modify schedule |
-| Route Scheduling | Use map-based route screen |
-| Time Entry – Accept | Approve daily time |
-| Weekly Time Review – Approve | Final-approve weekly hours |
-| Branch Admin | Configure branch-level mobile/timekeeping settings |
-| Subcontractor Portal Admin | Manage legacy subcontractor portal users |
+| **Break Time** | Standard time auto-deducted from each crew member's daily clock time. Enter in **decimal** (0.25 = 15 min, 0.50 = 30 min, 1.00 = 1 hr). |
+| **Early Clock-In Warning** | For states with minimum lunch requirements. If a user clocks out then back in before this many minutes, they're warned they aren't required back yet. Enter **0** to disable. |
+| **First Day of the Week** | Sets the first day of the payroll week. |
+| **OT Calculation** | **Standard** = OT only on hours under the employee's standard pay code. **Override Pay Code** = Aspire accounts for all time; with an override pay code it compares regular-pay-with-OT vs. override hours and uses the larger. |
+| **Default Geo Perimeter** | Perimeter (from property center outward) crews must be within to clock into a ticket via mobile. **Red push pin** = clocked in/out outside the perimeter; **green push pin** = inside. |
+| **Equipment Reading Clock-Out Prompt** | Prompts crew for equipment meter readings (per job, end of day, or a specific weekday). Blank = disabled. |
+| **Round Clock In/Out to Nearest 15 Minutes** | Rounds clock times to nearest 15 min. Does **not** affect job time entries. |
+| **Default Clock Time on Employee Time Card Report** | Time card clock-in/out determined only by the earliest clock-in and latest clock-out for the day; work ticket start/stop not considered. |
+
+**Sub-Portal Settings** enable subcontractor contacts (with user accounts) to access the subcontractor portal for their own time/material entry.
 
 ---
 
-## 3. Key Terminology
+## Branch-to-Branch Subcontract Work
 
-- **Work Ticket** — A scheduled occurrence of a service on a property.
-- **Visit** — A single appearance of a work ticket on the schedule (a ticket can have many visits).
-- **Route** — A reusable group of properties + services worked by one crew on a recurring day.
-- **Sequenced Schedule** — Visits ordered by sequence # (no clock time).
-- **Time-Based Schedule** — Visits with start/end times on the calendar.
-- **As-Needed Service** — Service with no pre-built ticket; created on demand.
-- **Quick Ticket** — Same-day mobile-created ticket for unplanned work.
+When a property in Branch A is serviced by a crew from Branch B:
 
----
-
-## 4. Schedule Board
-
-### 4.1 Views
-- **Route View** — Rows = crews/routes, columns = days.
-- **Property View** — Rows = properties, columns = days. Useful for client-centric scheduling.
-
-### 4.2 Visit Tile Icons
-| Icon | Meaning |
-|---|---|
-| 🟢 | Completed |
-| 🟡 | In progress |
-| ⚪ | Scheduled (not started) |
-| 🔴 | Rejected / time error |
-| 📍 | GEO mismatch flagged |
-| 📋 | Has checklist |
-| 💬 | Has notes |
-| 🌧️ | Weather event affected |
-
-### 4.3 Search Prefixes (S.T.O.P.)
-| Prefix | Searches |
-|---|---|
-| `s:` | Service name |
-| `t:` | Work ticket # |
-| `o:` | Opportunity name |
-| `p:` | Property name |
-| `c:` | Contact |
-| `cr:` | Crew |
-
-### 4.4 Three-Dot / Right-Click Menus
-- **Week tile** → Move week, copy week, clear week.
-- **Day tile** → Move day, mark day off (weather/holiday).
-- **Visit tile** → Edit, reschedule, mark complete, add note, view ticket, delete visit.
-
-### 4.5 Bulk Move Work Tickets
-1. Multi-select visits (Ctrl/Shift-click).
-2. Right-click → **Bulk Move**.
-3. Choose target date/crew → confirm.
-   - Sequenced visits keep their relative sequence.
-   - Time-based visits preserve relative offsets.
-
-⚠️ Bulk move respects route-level constraints (active dates, crew capacity).
-
----
-
-## 5. Routes
-
-### 5.1 Creating a Route
-Schedule Board → **+ Route** → enter:
-- Route name, branch, crew, start/end date, active days.
-- Add **Properties** → add **Services** under each property.
-- Choose **Sequenced** OR **Time-Based**.
-
-### 5.2 Sequencing & Recurring Schedules
-- Sequence # determines order on the day.
-- Recurring patterns: weekly, bi-weekly, monthly (Nth weekday), custom.
-- Use **Setup Sequence Numbers** screen to renumber in bulk.
-
-### 5.3 Time-Based Scheduling
-- Each visit gets explicit start/end time.
-- Drag tile edges on Schedule Board to resize.
-- Used when crews have appointments or fixed windows.
-
-### 5.4 Bulk Rescheduling (Sequenced & Time-Based)
-Schedule Board → **Bulk Reschedule**:
-- Select date range and route.
-- Shift forward/back N days, skip weekends, or move to specific date.
-- Preview impacted visits before confirming.
-
-### 5.5 Activate / Deactivate Routes
-- Deactivate stops new visit generation but keeps history.
-- Reactivate restores recurring generation from current date.
-
----
-
-## 6. Scheduling Assistant
-
-Auto-generates visits from recurring/sequenced rules.
-
-Workflow:
-1. Open **Scheduling Assistant**.
-2. Filter by branch, route, date range.
-3. Review proposed visits.
-4. **Generate** to push to Schedule Board.
-
-📌 Run weekly to keep the board populated 4–8 weeks out.
-
----
-
-## 7. Route Scheduling (Map View)
-
-- Map-based screen for optimizing stop order.
-- Drag pins to reorder, see drive time between stops.
-- Apply optimized sequence back to the route with one click.
-- Useful for new routes or when properties are added/removed.
-
----
-
-## 8. As-Needed Services & Work Tickets
-
-- Service flagged "As Needed" on the opportunity → no auto-tickets.
-- Create ticket on demand from the property or schedule board.
-- **Change As-Needed Service With No Work Tickets** — Edit service config (price/units) directly on opportunity since no tickets exist yet.
-
----
-
-## 9. Service Visit Checklists
-
-- Configured per service template.
-- Crew completes items in Aspire Mobile.
-- Required items block ticket completion until checked.
-- Checklist completion stored on the ticket for audit.
-
----
-
-## 10. Work Ticket Statuses
-
-
-| Status | Meaning |
-|---|---|
-| Scheduled | On board, not started |
-| In Progress | Crew clocked in |
-| Complete | Crew clocked out, ready for review |
-| Rejected | Time review sent back |
-| Invoiced | Billed to customer |
-
----
-
-## 11. Time Entry — Daily Acceptance
-
-### 11.1 Workflow
-1. Crew clocks time in mobile.
-2. Office opens **Time Entry** screen.
-3. Review per-crew, per-day entries.
-4. Resolve errors → **Accept**.
-5. Accepted hours feed Weekly Time Review.
-
-### 11.2 Common Time Entry Errors
-| Error | Cause | Fix |
-|---|---|---|
-| Missing clock-out | Crew forgot to clock out | Add manual clock-out |
-| Overlapping time | Two tickets share minutes | Adjust split |
-| Outside GEO perimeter | Clocked outside property radius | Verify location, override |
-| No ticket assigned | Time on no work ticket | Assign or convert to non-billable |
-| Pay code missing | Required pay code blank | Select pay code |
-| Future time | Entry timestamp in the future | Correct timestamp |
-
-### 11.3 Drive Time
-- Tracked between properties when enabled.
-- Auto-calculated from clock-out at site A → clock-in at site B.
-- Can be billable or non-billable per branch settings.
-
-### 11.4 GEO Perimeter
-- Branch-level radius around property GPS.
-- Crews clocking in outside radius are flagged.
-- Override permission required to accept.
-
----
-
-## 12. Weekly Time Review
-
-### 12.1 Status Flow
-
-
-### 12.2 Screen
-- Group by employee, crew, or branch.
-- Shows regular, OT, premium, drive, non-billable totals.
-- Edit hours inline; audit log captures every change.
-
-### 12.3 Bulk Actions
-- Select multiple employees → **Approve All**, **Reject All**, **Reset to Pending**.
-
-### 12.4 Audits
-- Every edit logs user, timestamp, before/after.
-- Available in Weekly Time Review history pane.
-
----
-
-## 13. Aspire Mobile
-
-### 13.1 Device Setup
-1. Install Aspire Mobile from Google Play / App Store.
-2. Tenant ID + login.
-3. Device must be authorized by an admin (one-time).
-4. Sync schedule on first login.
-
-### 13.2 Offline Mode
-- Cached schedule and forms work offline.
-- Time, materials, photos queued locally.
-- Auto-syncs when connection restored.
-
-### 13.3 Spanish Mode
-- Toggle in user profile.
-- Translates UI labels (data remains as entered).
-
-### 13.4 Quick Tickets
-- Mobile-created same-day tickets for unplanned work.
-- Crew picks property + service template → ticket auto-created.
-- Requires "Allow Quick Tickets" branch setting + service template flagged.
-
-### 13.5 Pay Code Overrides
-Estimator-set per-service pay codes can be overridden in mobile when the crew member is paid differently for certain work.
-
-| Pay Code Type | Effect |
-|---|---|
-| Premium Dollars | Adds flat $/hr on top of base |
-| Premium % | Adds % on top of base |
-| Fixed Rate | Replaces base rate entirely |
-
-**Choose Pay Code screen scenarios:**
-- Multiple pay codes available → crew selects on clock-in.
-- Default pay code set → auto-applied unless changed.
-- Locked pay code → no override allowed (admin-controlled).
-
-📌 Pay code overrides flow into Weekly Time Review and respect approval workflow.
-
-### 13.6 Tracking Time with Multiple Pay Codes
-- Crew can switch pay codes mid-shift (e.g., regular → snow premium).
-- Each segment recorded separately with its own pay code.
-- Visible as split rows in Time Entry.
-
-### 13.7 Custom Forms in Aspire Mobile
-4 form trigger types:
-| Trigger | Fires |
-|---|---|
-| Clock In | Start of shift |
-| Clock Out | End of shift |
-| Start Ticket | When ticket begins |
-| Complete Ticket | When ticket marked done |
-
-**Setup:** Admin → Application Configuration → Custom Forms → assign to service templates or branches.
-
-**Field types:** text, number, date, dropdown, checkbox, signature, photo, GPS.
-
-**Review locations:** Form responses appear on the work ticket, in property history, and exportable via reports.
-
-⚠️ Required fields block clock-in/out or ticket completion until answered.
-
----
-
-## 14. 6.21.0 Timekeeping Updates
-
-### 14.1 Branch-Level Settings
-- Per-branch: GEO radius, drive time billable/non-billable, allow quick tickets, require checklists, pay code defaults.
-- Replaces older tenant-wide settings for multi-branch flexibility.
-
-### 14.2 Time Correction Requests (Mobile)
-- Crew submits correction from mobile (e.g., forgot clock-out).
-- Routed to supervisor approval queue.
-- Approved corrections post to Time Entry automatically.
-
-### 14.3 Auto Time Acceptance
-- Branch setting: auto-accept time entries with no errors after N hours.
-- Errors still require manual review.
-- 📌 Reduces office workload for clean crews.
-
----
-
-## 15. Branch-to-Branch Subcontract Work
-
-When a property in Branch A is serviced by a crew from Branch B.
-
-| Option | When to Use | Pros | Cons |
+| Option | When to use | Pros | Cons |
 |---|---|---|---|
 | 1. Branch B as subcontractor on Branch A's ticket | Simple cross-branch labor | Single ticket; clean P&L allocation | Requires subcontractor setup |
 | 2. Transfer property to Branch B | Permanent move | Simplest long-term | Loses Branch A history |
 | 3. Mirror opportunities in both branches | Joint accountability | Both branches see revenue | Double maintenance |
 | 4. Internal labor transfer (journal) | Occasional | No structural changes | Manual accounting work |
 
-📌 Most common: Option 1 (subcontract) for ad-hoc, Option 2 for permanent moves.
+Most common: Option 1 (subcontract) for ad-hoc, Option 2 for permanent moves. (For the subcontractor billing/PR workflow, see `subcontractor-extra-work-module.md`.)
 
 ---
 
-## 16. Legacy Subcontractor Portal (System Admins)
+## Required Permissions
 
-### 16.1 Admin Setup
-1. Enable Subcontractor Portal in Application Configuration.
-2. Create subcontractor as a **Contact** with type = Subcontractor.
-3. Create portal **User** linked to that contact.
-4. Send activation email; subcontractor sets password.
-
-### 16.2 Device Authorization
-- Subcontractor's device must be approved by admin on first login.
-
-### 16.3 Time & Material Entry
-- Subcontractor logs into portal → sees assigned tickets.
-- Enters time, materials, notes.
-- Submits → enters Aspire's Time Entry queue.
-
-### 16.4 Partial Occurrence
-- If subcontractor completes only part of a visit, mark partial → remainder stays scheduled.
-
-### 16.5 Closed Month Handling
-- Time entered against a closed accounting month is flagged.
-- Admin must reopen month or re-date entry to current period.
-
-### 16.6 Crew Mobile Visibility
-- Subcontractor time also visible in Crew Mobile under the assigned ticket for transparency.
-
-⚠️ Legacy portal is being phased out in favor of Aspire Mobile for subcontractors. Use only if mobile is not feasible.
+| Action | Permission |
+|--------|-----------|
+| Manage/edit routes, crew, properties | Edit Routes + Full Access to Schedule Board |
+| Activate/deactivate a route | View Routes |
+| Choose sequenced vs. time-based | Time-Based Scheduling checkbox on the branch |
+| View visit checklists report | View Visit Checklists |
+| Make checklist items mandatory | Make Visit Checklist Items Mandatory in the Service Catalog |
+| Approve/export payroll time | (Weekly Time Review access / Bulk Actions) |
 
 ---
 
-## 17. Lists to Create for the Scheduling Module
+## Daily Scheduling Checklist (Best Practices)
 
-Recommended saved list filters:
-
-| List | Filter Recipe |
-|---|---|
-| Maintenance Recurring (Active) | Service Type = Maintenance, Recurring = Yes, Status = Active |
-| Maintenance Non-Recurring | Service Type = Maintenance, Recurring = No |
-| Multiple Occurrences This Week | Visit Count > 1, Date = This Week |
-| Enhancement Open | Service Type = Enhancement, Ticket Status ≠ Complete |
-| Construction WIP | Service Type = Construction, Status In Progress |
-| Unscheduled Active Tickets | Scheduled Date is Empty, Ticket Status = Active |
-| Past-Due Visits | Scheduled Date < Today, Status ≠ Complete |
-| GEO Mismatch Last 7 Days | Time Entry has GEO error, Date = Last 7 days |
-
-📌 Save these as Tile Lists for quick scheduling-team dashboards.
+✅ Review the Open work-ticket lists daily and schedule tickets near their start date.
+✅ Investigate any ticket stuck in Scheduled past its date (future visit? backordered materials?).
+✅ Do Daily Time Acceptance every day — catch errors before payroll.
+✅ After skipping visits or inserting blank days, look ahead for conflicts and over-scheduling.
+✅ Keep only one Crew Leader per route; add all crew members so absentee notifications cover everyone.
+✅ Prefer individual visit changes (drag-and-drop, skip, reschedule) over sweeping bulk changes.
+❌ Don't filter Weekly Time Review by branch (you may miss cross-branch hours).
+❌ Don't set a quick-ticket price above $0 unless you intend to switch it from T&M to Fixed Price.
 
 ---
 
-## 18. How-To: Search the Schedule Board with Prefixes
+## Related (see other modules)
 
-Use the **S.T.O.P.** prefixes (section 4.3) in the board search bar.
-- `t:12345` → jump straight to ticket #12345.
-- `p:Smith` → all visits at properties matching "Smith".
-- `cr:North` → all visits for crews containing "North".
-
----
-
-## 19. Tips and Best Practices
-
-### ✅ Do
-- ✅ Run Scheduling Assistant weekly to keep 4–8 weeks visible.
-- ✅ Use Route View for crew-centric ops, Property View for client-centric calls.
-- ✅ Enable GEO perimeter and Auto Time Acceptance to reduce office review time.
-- ✅ Set required custom forms for high-risk services (chemical apps, snow).
-- ✅ Use Bulk Reschedule for weather days — never edit visits one-by-one.
-- ✅ Train crews on Quick Tickets for unplanned work to avoid lost revenue.
-- ✅ Configure pay code defaults at branch level when crews routinely earn premiums.
-- ✅ Approve Weekly Time Review by Monday morning to keep payroll on schedule.
-
-### ❌ Don't
-- ❌ Don't delete visits to "reschedule" — use right-click → Reschedule (preserves history).
-- ❌ Don't bypass GEO errors without verifying location — defeats the purpose.
-- ❌ Don't override pay codes without supervisor sign-off if locked at admin.
-- ❌ Don't enter subcontractor time in a closed accounting month — reopen or re-date.
-- ❌ Don't transfer properties cross-branch just for one-off work — use subcontract option.
-- ❌ Don't leave As-Needed services with stale opportunity pricing — review quarterly.
+- **Full work-ticket actions** (complete, cancel, approve, statuses in depth) → Work Tickets module.
+- **Consumables setup** (catalog, pricing) → Opportunities module.
+- **SMS setup, geo-perimeter config, user roles, branches** → Administration.
+- **Subcontractor billing / PR workflow** → subcontractor-extra-work module.
 
 ---
 
-## 20. Quick Reference — Daily Scheduling Checklist
+## Common Questions (from Aspire Academy)
 
-1. Open Schedule Board → check today's coverage.
-2. Resolve any 🔴 / 📍 visits from yesterday in Time Entry.
-3. Accept clean daily time entries.
-4. Run Scheduling Assistant if 4-week horizon is thin.
-5. Review weather forecast → bulk reschedule if needed.
-6. Monday: approve last week's Weekly Time Review.
+**Q: How do I schedule a work ticket?**
+Open the schedule board (Scheduling icon → choose the route manager), open the work-ticket list (clipboard icon), and drag the ticket onto the correct route and day — or use the Scheduling Assistant for recurring/time-based visits.
 
----
+**Q: What's the difference between sequenced and time-based routes?**
+Sequenced routes have no set times — visits run in sequence based on the route's man-hours. Time-based routes require specific start/end times per visit (and support overnight work), but route optimization is disabled and absentee notifications require them.
 
-## 21. Source URLs
+**Q: How many Crew Leaders can a route have?**
+Only one Crew Leader per route. A manager can have multiple routes, though.
 
-Primary module: https://guide.youraspire.com/docs/scheduling-1
+**Q: How do I change the order crews visit properties?**
+Use Route Scheduling (three-dot → Route Scheduling → Set Route Order → click icons in order) for manual ordering, or Route Optimization to let Aspire order them automatically by drive time.
 
-Sub-categories:
-- Using the Scheduling Module: https://guide.youraspire.com/docs/using-the-scheduling-module
-- Time Acceptance and Review: https://guide.youraspire.com/docs/time-acceptance-and-review
-- Mobile and Time Entry: https://guide.youraspire.com/docs/mobile-and-time-entry
-- Legacy Scheduling Documentation: https://guide.youraspire.com/docs/legacy-scheduling-documentation
-- Lists to Create: https://guide.youraspire.com/docs/lists-to-create-for-the-scheduling-module
+**Q: How do I skip a visit for a week?**
+Right-click the visit tile → Skip This Week's Visit (only for weekly/bi-weekly recurring visits). It pushes all occurrences forward one week — any ticket pushed past the contract end date goes back to Open, so complete it before the contract ends.
 
-Key articles:
-- Schedule Board Screen: https://guide.youraspire.com/docs/schedule-board-screen
-- Scheduling Assistant: https://guide.youraspire.com/docs/using-the-scheduling-assistant
-- Route Scheduling: https://guide.youraspire.com/docs/route-scheduling-screen-1
-- Sequence Numbers & Recurring: https://guide.youraspire.com/docs/setting-up-sequence-numbers-and-recurring-schedules
-- Creating & Managing Routes: https://guide.youraspire.com/docs/creating-and-managing-routes
-- Search Prefixes: https://guide.youraspire.com/docs/how-to-use-prefixes-to-search-for-schedule-board-work-tickets
-- As-Needed Services: https://guide.youraspire.com/docs/using-as-needed-services-and-work-tickets
-- Time-Based Scheduling: https://guide.youraspire.com/docs/time-based-scheduling
-- Time Entry Errors: https://guide.youraspire.com/docs/understanding-time-entry-errors-in-aspire
-- Bulk Reschedule: https://guide.youraspire.com/docs/bulk-rescheduling-sequenced-and-time-based-visits
-- Bulk Move: https://guide.youraspire.com/docs/bulk-moving-work-tickets-on-the-schedule-board
-- Property View: https://guide.youraspire.com/docs/property-view-schedule-board-1
-- Service Visit Checklists: https://guide.youraspire.com/docs/service-visit-checklists
-- Change As-Needed Service: https://guide.youraspire.com/docs/change-as-needed-service-with-no-work-tickets
-- Time Entry Acceptance Workflow: https://guide.youraspire.com/docs/time-entry-acceptance-workflow-and-checklist
-- Approving Weekly Time Review: https://guide.youraspire.com/docs/approving-weekly-time-review-hours
-- Weekly Time Review Screen: https://guide.youraspire.com/docs/weekly-time-review-screen
-- Drive Time: https://guide.youraspire.com/docs/drive-time
-- Time Entry Screen Reference: https://guide.youraspire.com/docs/time-entry-screen-reference
-- Aspire Mobile Setup: https://guide.youraspire.com/docs/setting-up-aspire-mobile-on-mobile-devices
-- Quick Tickets: https://guide.youraspire.com/docs/enabling-and-using-quick-tickets-in-aspire
-- Multiple Pay Codes: https://guide.youraspire.com/docs/tracking-time-with-multiple-pay-codes-in-crew-mobile
-- Custom Forms in Mobile: https://guide.youraspire.com/docs/using-custom-forms-in-aspire-mobile
-- 6.21.0 Timekeeping Updates: https://guide.youraspire.com/docs/6210-timekeeping-updates
-- Branch-to-Branch Subcontract: https://guide.youraspire.com/docs/how-to-manage-branch-to-branch-subcontract-work
-- Legacy Subcontractor Portal: https://guide.youraspire.com/docs/using-the-legacy-subcontractor-portal-for-system-admins
+**Q: A crew is out sick — how do I push their schedule without breaking everything?**
+Right-click a day on the route → Insert Blank Days → specify how many days of visits to move and how far forward. Then look ahead for conflicts and confirm the route isn't over-scheduled.
+
+**Q: How do I reschedule or reassign a visit?**
+Drag the visit tile to a different day or route on the schedule board. Moving it to another route reassigns the crew.
+
+**Q: How do I take a ticket off the schedule without cancelling the work?**
+Drag it back to the work-ticket list (or right-click → remove). The ticket returns to Open and can be rescheduled. To cancel the work entirely, use the Work Tickets module (cancellation depends on invoice type).
+
+**Q: How is drive time calculated?**
+It's the Difference between tickets; on save, Aspire distributes it proportionally across the day's tickets. Exaggerated drive time usually means time wasn't applied to a ticket.
+
+**Q: What should I review first in Daily Time Acceptance?**
+Clock Time first, then Direct Job Time, then Indirect Time, then the Difference (drive time). Save when correct — the icon turns to a green clock.
+
+**Q: What do the time-entry statuses mean?**
+Unaccepted (entered but not accepted in Daily) → Pending (accepted, ready for approval — the goal) → Approved → Exported (sent to payroll). You can't skip stages.
+
+**Q: Why shouldn't I filter Weekly Time Review by branch?**
+You may miss an employee's cross-branch hours. Filter by pay schedule instead if you need to separate hourly vs. salaried.
+
+**Q: How do quick tickets work, and what's the price warning?**
+A crew leader logs time/materials in mobile for an unplanned job without a full estimate. Keep the Time Entry price at $0 — setting it above $0 automatically switches the ticket from T&M to Fixed Price on Completion.
+
+**Q: When do visit reminders send?**
+The day before the visit at the template time — unless the visit was scheduled after the reminder time, in which case it isn't sent.
+
+**Q: What are absentee notifications and what do they require?**
+Internal alerts when a team member hasn't clocked in after the scheduled start. They only work on time-based routes, and the Grace Period sets how long to wait before sending.
